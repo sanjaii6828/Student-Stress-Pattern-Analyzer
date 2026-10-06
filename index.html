@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Stress Pattern Analyzer | Interactive R Lab Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Load Chart.js for interactive client-side visual analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation & Brand Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="brand-icon">📈</div>
+        <div class="brand-titles">
+          <h1>Student Stress Pattern Analyzer</h1>
+          <p>R Programming Laboratory Project • Interactive Analytics Portal</p>
+        </div>
+      </div>
+      <nav class="nav-tabs" aria-label="Main Navigation">
+        <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+        <button class="tab-btn" data-tab="simulator">⚡ Stress Simulator</button>
+        <button class="tab-btn" data-tab="visualizer">🔬 Visualizations</button>
+        <button class="tab-btn" data-tab="explorer">📋 Student Explorer</button>
+        <button class="tab-btn" data-tab="statistics">📑 Statistical Report</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-main">
+
+    <!-- Global Filter Card -->
+    <section class="filter-card" aria-label="Cohort Filter Controls">
+      <div class="filter-header">
+        <h2>🔍 Cohort Segmentation & Search</h2>
+        <button id="btn-reset-filters" class="btn btn-outline">↺ Reset Filters</button>
+      </div>
+      <div class="filter-grid">
+        <div class="form-group">
+          <label for="filter-dept">Department</label>
+          <select id="filter-dept" class="form-control">
+            <option value="all">All Departments</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="filter-year">Academic Year</label>
+          <select id="filter-year" class="form-control">
+            <option value="all">All Years</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="filter-category">Stress Category</label>
+          <select id="filter-category" class="form-control">
+            <option value="all">All Categories</option>
+            <option value="Low">Low (&lt; 42)</option>
+            <option value="Moderate">Moderate (42 - 68)</option>
+            <option value="High">High (≥ 68)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="filter-gender">Gender</label>
+          <select id="filter-gender" class="form-control">
+            <option value="all">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Non-Binary">Non-Binary</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="filter-search">Search Student</label>
+          <input type="text" id="filter-search" class="form-control" placeholder="Search name or ID...">
+        </div>
+      </div>
+    </section>
+
+    <!-- Top KPI Summary Cards -->
+    <section class="kpi-grid" aria-label="Key Performance Indicators">
+      <div class="kpi-card blue">
+        <div class="kpi-icon">🎓</div>
+        <div class="kpi-content">
+          <div class="kpi-label">Filtered Students</div>
+          <div id="kpi-total" class="kpi-value">200</div>
+          <div class="kpi-sub">Total sample cohort: 200</div>
+        </div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-content">
+          <div class="kpi-label">Mean Stress Score</div>
+          <div id="kpi-mean" class="kpi-value">45.8 / 100</div>
+          <div class="kpi-sub">SD = 21.7 • Range: 5.0 - 92.9</div>
+        </div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon">🌱</div>
+        <div class="kpi-content">
+          <div class="kpi-label">Low Stress Cohort</div>
+          <div id="kpi-low" class="kpi-value">82 (41%)</div>
+          <div class="kpi-sub">Score threshold &lt; 42.0</div>
+        </div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-content">
+          <div class="kpi-label">Moderate Stress</div>
+          <div id="kpi-mod" class="kpi-value">84 (42%)</div>
+          <div class="kpi-sub">Score threshold 42.0 - 68.0</div>
+        </div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-icon">🚨</div>
+        <div class="kpi-content">
+          <div class="kpi-label">High Stress Risk</div>
+          <div id="kpi-high" class="kpi-value">34 (17%)</div>
+          <div class="kpi-sub">Score threshold ≥ 68.0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 1: DASHBOARD OVERVIEW
+         ======================================================================= -->
+    <section id="tab-dashboard" class="tab-content active">
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Stress Classification Breakdown</h3>
+            <span class="badge">Doughnut Distribution</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-category"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Average Stress Score by Department</h3>
+            <span class="badge">Departmental Mean</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-dept"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Sleep Duration vs. Stress Score</h3>
+            <span class="badge">Inverse Correlation (r = -0.88)</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-scatter"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Stress Progression Across Academic Years</h3>
+            <span class="badge">Year 1 to Year 4</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="chart-year"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 2: STRESS SIMULATOR (WHAT-IF CALCULATOR)
+         ======================================================================= -->
+    <section id="tab-simulator" class="tab-content">
+      <div class="simulator-layout">
+        <div class="simulator-controls">
+          <h2 style="font-size: 1.25rem; font-weight: 700;">Live What-If Stress Predictor</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Adjust student lifestyle parameters to evaluate real-time predicted stress scores using our validated multi-criteria mathematical model.
+          </p>
+
+          <div class="sim-slider-group">
+            <div class="sim-label-row">
+              <span>Academic Workload (1 to 5)</span>
+              <strong id="val-workload">3</strong>
+            </div>
+            <input type="range" id="sim-workload" class="sim-slider" min="1" max="5" value="3" step="1">
+          </div>
+
+          <div class="sim-slider-group">
+            <div class="sim-label-row">
+              <span>Assignment Pressure (1 to 5)</span>
+              <strong id="val-pressure">3</strong>
+            </div>
+            <input type="range" id="sim-pressure" class="sim-slider" min="1" max="5" value="3" step="1">
+          </div>
+
+          <div class="sim-slider-group">
+            <div class="sim-label-row">
+              <span>Daily Sleep Duration</span>
+              <strong id="val-sleep">6.5 hrs</strong>
+            </div>
+            <input type="range" id="sim-sleep" class="sim-slider" min="3" max="10" value="6.5" step="0.1">
+          </div>
+
+          <div class="sim-slider-group">
+            <div class="sim-label-row">
+              <span>Daily Screen Time</span>
+              <strong id="val-screen">7.5 hrs</strong>
+            </div>
+            <input type="range" id="sim-screen" class="sim-slider" min="1" max="14" value="7.5" step="0.5">
+          </div>
+
+          <div class="sim-slider-group">
+            <div class="sim-label-row">
+              <span>Daily Study Hours</span>
+              <strong id="val-study">5.0 hrs</strong>
+            </div>
+            <input type="range" id="sim-study" class="sim-slider" min="1" max="10" value="5.0" step="0.5">
+          </div>
+
+          <div class="sim-slider-group">
+            <div class="sim-label-row">
+              <span>Attendance Percentage</span>
+              <strong id="val-attendance">85%</strong>
+            </div>
+            <input type="range" id="sim-attendance" class="sim-slider" min="50" max="100" value="85" step="1">
+          </div>
+
+          <div class="sim-slider-group">
+            <div class="sim-label-row">
+              <span>Physical Activity</span>
+              <strong id="val-activity">1.5 hrs</strong>
+            </div>
+            <input type="range" id="sim-activity" class="sim-slider" min="0" max="4" value="1.5" step="0.1">
+          </div>
+        </div>
+
+        <div class="simulator-result">
+          <div id="sim-gauge-circle" class="gauge-circle mod">
+            <div id="sim-gauge-score" class="gauge-score">46.5</div>
+            <div class="gauge-max">out of 100</div>
+          </div>
+          <span id="sim-tier-badge" class="badge-tier badge-mod">MODERATE STRESS</span>
+          <div id="sim-feedback" class="sim-feedback">
+            ⚠️ <strong>Elevated Load:</strong> Consider increasing nightly sleep by 1 hour or incorporating 30 minutes of physical exercise.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 3: VISUALIZATIONS & R PUBLICATION PLOT GALLERY
+         ======================================================================= -->
+    <section id="tab-visualizer" class="tab-content">
+      <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700;">Publication-Grade R Graphics Gallery</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          High-resolution plots generated natively via base R scripts (<a href="plots/09_stress_analytics_dashboard.png" target="_blank">View Raw Folder</a>). Click any plot to expand fullscreen.
+        </p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-card">
+          <img src="plots/09_stress_analytics_dashboard.png" alt="Multi-Dimensional Dashboard" data-title="Comprehensive 2x2 Analytics Dashboard">
+          <div class="gallery-caption">
+            <h4>09. Multi-Dimensional Master Dashboard</h4>
+            <p>2x2 executive synthesis featuring Distribution, Density, Scatter, and Boxplot.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="plots/01_barchart_stress_distribution.png" alt="Bar Chart: Stress Distribution" data-title="Plot 1: Stress Category Distribution">
+          <div class="gallery-caption">
+            <h4>01. Stress Category Distribution</h4>
+            <p>Bar chart with percentage and count annotations above each category.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="plots/02_barchart_dept_stress.png" alt="Clustered Bar Chart: Department vs Year" data-title="Plot 2: Department vs Year Clustered Bar Chart">
+          <div class="gallery-caption">
+            <h4>02. Department vs. Year Comparison</h4>
+            <p>Clustered grouped bar chart showing average stress score by department.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="plots/03_histogram_stress_scores.png" alt="Histogram: Stress Score Density" data-title="Plot 3: Stress Score Density Fit">
+          <div class="gallery-caption">
+            <h4>03. Stress Score Density & Normal Curve</h4>
+            <p>Histogram with empirical kernel density curve and theoretical normal fit.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="plots/04_histogram_sleep_vs_study.png" alt="Dual Histogram: Sleep vs Study" data-title="Plot 4: Sleep vs Study Histograms">
+          <div class="gallery-caption">
+            <h4>04. Sleep vs. Study Hours Distribution</h4>
+            <p>Dual-panel comparative histograms with mean indicators.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="plots/05_scatterplot_sleep_vs_stress.png" alt="Scatter Plot: Sleep vs Stress" data-title="Plot 5: Sleep vs Stress Linear Regression">
+          <div class="gallery-caption">
+            <h4>05. Sleep Duration vs. Stress Regression</h4>
+            <p>Scatter plot with fitted linear regression line (y = 125.9 - 14.3x, r = -0.88).</p>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="plots/06_scatterplot_screen_vs_stress.png" alt="Scatter Plot: Screen vs Stress" data-title="Plot 6: Screen vs Stress Moderated by Activity">
+          <div class="gallery-caption">
+            <h4>06. Screen Time Moderated by Physical Activity</h4>
+            <p>Scatter plot colored by physical activity tier (Sedentary, Moderate, Active).</p>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="plots/07_boxplot_stress_by_academic_year.png" alt="Box Plot: Academic Year" data-title="Plot 7: Stress Progression Across Academic Years">
+          <div class="gallery-caption">
+            <h4>07. Stress Progression Across Academic Years</h4>
+            <p>Box plot with interquartile range boxes, medians, and mean markers.</p>
+          </div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="plots/08_boxplot_stress_by_sleep_tier.png" alt="Box Plot: Sleep Tier" data-title="Plot 8: Stress by Sleep Duration Category">
+          <div class="gallery-caption">
+            <h4>08. Stress Score by Sleep Tier</h4>
+            <p>Box plot illustrating the protective effect of adequate sleep duration.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 4: STUDENT DATA EXPLORER (RESPONSIVE TABLE)
+         ======================================================================= -->
+    <section id="tab-explorer" class="tab-content">
+      <div class="table-toolbar">
+        <div id="table-stats" class="table-stats">Showing 1 to 12 of 200 students</div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <button id="btn-export-csv" class="btn btn-outline">📥 Export Filtered CSV</button>
+          <div class="pagination">
+            <button id="btn-prev-page" class="page-btn">◀ Prev</button>
+            <span id="page-indicator" style="font-size: 0.8rem; font-weight: 600; padding: 0 0.5rem;">Page 1 of 17</span>
+            <button id="btn-next-page" class="page-btn">Next ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th data-col="id">ID ↕</th>
+              <th data-col="name">Name ↕</th>
+              <th data-col="department">Department ↕</th>
+              <th data-col="year">Year ↕</th>
+              <th data-col="studyHours">Study ↕</th>
+              <th data-col="sleepHours">Sleep ↕</th>
+              <th data-col="screenTime">Screen ↕</th>
+              <th data-col="workload">Workload ↕</th>
+              <th data-col="attendance">Attendance ↕</th>
+              <th data-col="physicalActivity">Activity ↕</th>
+              <th data-col="stressScore">Stress Score ↕</th>
+              <th data-col="stressCategory">Category ↕</th>
+            </tr>
+          </thead>
+          <tbody id="student-table-body">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         TAB 5: STATISTICAL REPORT & MODEL SUMMARY
+         ======================================================================= -->
+    <section id="tab-statistics" class="tab-content">
+      <div class="stat-section">
+        <h3>🔬 Inferential Hypothesis Testing (Independent Two-Sample Welch t-test)</h3>
+        <p class="stat-p">
+          Testing difference in stress score between <strong>Short Sleep (&lt; 6 hrs)</strong> and <strong>Adequate Sleep (≥ 6 hrs)</strong> cohorts.
+        </p>
+        <div class="code-box">
+Group 1 (Sleep &lt; 6h, n = 125): Mean Stress = 58.14
+Group 2 (Sleep ≥ 6h, n =  75): Mean Stress = 25.19
+Welch Two Sample t-test:
+  t-statistic = 15.344, df = 156.27, p-value = 2.6876e-33 (&lt; 0.001)
+Conclusion: Reject H0. Severe sleep deficit significantly increases student stress by an average of 32.95 points.
+        </div>
+      </div>
+
+      <div class="stat-section">
+        <h3>📊 Multiple Linear Regression Model (Predicting Composite Stress)</h3>
+        <p class="stat-p">
+          Fitted model predicting <code>Calculated_Stress_Score</code> from behavioral and academic predictors (Multiple R² = 0.941, Adjusted R² = 0.939):
+        </p>
+        <div class="code-box">
+Coefficients:
+                          Estimate  Std. Error   t value   Pr(&gt;|t|)
+(Intercept)               46.2920     8.5068      5.442   1.58e-07 ***
+Sleep_Hours_Per_Day       -4.5667     0.5440     -8.394   9.70e-15 ***
+Academic_Workload         11.9703     0.7184     16.662   2.81e-39 ***
+Screen_Time_Hours          1.3713     0.2651      5.173   5.72e-07 ***
+Physical_Activity_Hours   -4.3308     0.6356     -6.814   1.17e-10 ***
+Attendance_Percentage     -0.2093     0.0626     -3.342   9.98e-04 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+        </div>
+      </div>
+
+      <div class="stat-section">
+        <h3>📈 Pearson Correlation Matrix Summary</h3>
+        <p class="stat-p">
+          Correlation coefficients ($r$) between student behaviors and the calculated stress score:
+        </p>
+        <div class="code-box">
+Variable                  Pearson r with Stress   Interpretation
+-------------------------------------------------------------------------
+Academic_Workload                +0.940           Dominant positive stress driver
+Sleep_Hours_Per_Day              -0.879           Dominant protective factor
+Assignment_Pressure              +0.858           Strong positive contributor
+Study_Hours_Per_Day              +0.764           Moderate-strong positive correlation
+Screen_Time_Hours                +0.545           Moderate positive correlation
+Physical_Activity_Hours          -0.504           Moderate protective buffer
+Attendance_Percentage            -0.454           Inverse correlation (attendance penalty)
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Lightbox Modal for Plot Inspection -->
+  <div id="plot-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title" style="font-size: 1.1rem; font-weight: 700;">Plot Inspection</h3>
+        <button id="btn-modal-close" class="btn-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <img id="modal-img" src="" alt="Enlarged Plot">
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>Student Stress Pattern Analyzer • R Programming Lab Project • Pure R Backend &amp; Modern Vanilla Web Frontend</p>
+  </footer>
+
+  <!-- Application Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+
